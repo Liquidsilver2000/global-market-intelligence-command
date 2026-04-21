@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Market Intelligence Command | SPAR International</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0c10;
+            --bg-secondary: #0f1318;
+            --bg-tertiary: #151a21;
+            --accent-cyan: #00d4ff;
+            --accent-emerald: #00e5a0;
+            --accent-amber: #ffb800;
+            --accent-blue: #3b82f6;
+            --text-primary: #ffffff;
+            --text-secondary: #a8b4c4;
+            --text-tertiary: #5a6a7a;
+            --glass-bg: rgba(20, 28, 38, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.06);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* World Map Background */
+        .world-map {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.04;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 500'%3E%3Cpath fill='%23ffffff' d='M150,200 Q200,150 250,180 T350,160 Q400,140 450,170 T550,150 Q600,130 650,160 T750,140 Q800,120 850,150 L850,250 Q800,280 750,260 T650,290 Q600,310 550,280 T450,300 Q400,320 350,290 T250,310 Q200,330 150,300 Z'/%3E%3C/svg%3E");
+            background-size: cover;
+            background-position: center;
+        }
+
+        /* Grid Overlay */
+        .grid-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0.02;
+            background-image: 
+                linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 60px 60px;
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent-cyan), var(--accent-emerald), var(--accent-amber));
+            z-index: 1000;
+            transform-origin: left;
+            transform: scaleX(0);
+        }
+
+        /* Floating Timeline */
+        .timeline-container {
+            position: fixed;
+            left: 40px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .timeline-line {
+            width: 2px;
+            height: 200px;
+            background: linear-gradient(180deg, var(--accent-cyan), var(--accent-emerald));
+            position: relative;
+            border-radius: 1px;
+        }
+
+        .timeline-marker {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: var(--accent-cyan);
+            border-radius: 50%;
+            left: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 0 15px var(--accent-cyan);
+            transition: top 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .timeline-year {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            color: var(--text-tertiary);
+            letter-spacing: 2px;
+        }
+
+        .timeline-year.active {
+            color: var(--accent-cyan);
+            text-shadow: 0 0 10px var(--accent-cyan);
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            padding: 80px 40px;
+            background: radial-gradient(ellipse at center, rgba(0,212,255,0.05) 0%, transparent 60%);
+        }
+
+        .hero-content {
+            text-align: center;
+            max-width: 900px;
+            z-index: 10;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 100px;
+            font-size: 11px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--accent-cyan);
+            margin-bottom: 40px;
+            backdrop-filter: blur(20px);
+        }
+
+        .hero-badge::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            background: var(--accent-cyan);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.2); }
+        }
+
+        .hero-title {
+            font-size: clamp(36px, 6vw, 72px);
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, #fff 0%, var(--accent-cyan) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-role {
+            font-size: clamp(18px, 2.5vw, 28px);
+            font-weight: 400;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+
+        .hero-company {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+            color: var(--accent-emerald);
+            letter-spacing: 2px;
+            margin-bottom: 16px;
+        }
+
+        .hero-meta {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            color: var(--text-tertiary);
+            letter-spacing: 2px;
+        }
+
+        .hero-description {
+            max-width: 650px;
+            margin: 40px auto 0;
+            font-size: 16px;
+            color: var(--text-secondary);
+            line-height: 1.8;
+        }
+
+        /* Pillar Sections */
+        .pillar-section {
+            min-height: 100vh;
+            position: relative;
+            display: flex;
+            align-items: center;
+            padding: 80px 60px;
+            overflow: hidden;
+        }
+
+        .pillar-container {
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 80px;
+            align-items: center;
+        }
+
+        .pillar-content {
+            z-index: 10;
+        }
+
+        .pillar-number {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            letter-spacing: 4px;
+            color: var(--text-tertiary);
+            margin-bottom: 16px;
+        }
+
+        .pillar-title {
+            font-size: clamp(32px, 3.5vw, 52px);
+            font-weight: 700;
+            margin-bottom: 40px;
+            line-height: 1.2;
+        }
+
+        .responsibility-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 16px;
+            backdrop-filter: blur(24px);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .responsibility-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--card-accent, var(--accent-cyan));
+            opacity: 0.6;
+        }
+
+        .responsibility-card:hover {
+            transform: translateX(8px);
+            border-color: var(--card-accent, var(--accent-cyan));
+            box-shadow: 0 0 30px rgba(0,212,255,0.08);
+        }
+
+        .responsibility-text {
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        /* Visual Container */
+        .visual-container {
+            position: relative;
+            height: 550px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Glass Panel Base */
+        .glass-panel {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            backdrop-filter: blur(28px) saturate(140%);
+            box-shadow: 
+                0 0 0 1px rgba(255,255,255,0.03),
+                0 40px 80px rgba(0,0,0,0.4),
+                inset 0 1px 0 rgba(255,255,255,0.03);
+        }
+
+        /* Transition Panels */
+        .transition-panel {
+            min-height: 50vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            background: radial-gradient(ellipse at center, rgba(0,0,0,0.3) 0%, transparent 70%);
+        }
+
+        .transition-arrow {
+            font-size: 40px;
+            color: var(--text-tertiary);
+            margin: 16px 0;
+            opacity: 0.4;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(8px); }
+        }
+
+        .transition-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: var(--text-tertiary);
+        }
+
+        /* Pillar 1: Global Distribution Map */
+        .distribution-map {
+            width: 100%;
+            max-width: 500px;
+            height: 450px;
+            position: relative;
+        }
+
+        .map-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 400px;
+            height: 250px;
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            background: rgba(0,212,255,0.03);
+            overflow: hidden;
+        }
+
+        .map-node {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--accent-cyan);
+            box-shadow: 0 0 10px var(--accent-cyan);
+            opacity: 0;
+        }
+
+        .map-node.pulse {
+            animation: nodePulse 2s infinite;
+        }
+
+        @keyframes nodePulse {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.3); opacity: 1; }
+        }
+
+        .command-center {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 16px 24px;
+            background: rgba(0,212,255,0.1);
+            border: 1px solid var(--accent-cyan);
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .command-label {
+            font-size: 10px;
+            color: var(--accent-cyan);
+            letter-spacing: 2px;
+        }
+
+        .analyst-team {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .analyst-node {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            opacity: 0;
+        }
+
+        /* Pillar 2: KPI Dashboard */
+        .kpi-dashboard {
+            width: 100%;
+            max-width: 480px;
+            padding: 24px;
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .dashboard-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .kpi-card {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .kpi-label {
+            font-size: 9px;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .kpi-value {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--accent-emerald);
+        }
+
+        .performance-chart {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 20px;
+            height: 160px;
+        }
+
+        .chart-title {
+            font-size: 10px;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+        }
+
+        .chart-svg {
+            width: 100%;
+            height: 100px;
+        }
+
+        .chart-line {
+            fill: none;
+            stroke: var(--accent-emerald);
+            stroke-width: 2;
+            stroke-dasharray: 400;
+            stroke-dashoffset: 400;
+        }
+
+        .projection-line {
+            fill: none;
+            stroke: var(--accent-amber);
+            stroke-width: 2;
+            stroke-dasharray: 5,5;
+            stroke-dashoffset: 200;
+        }
+
+        /* Pillar 3: Executive Strategy */
+        .strategy-visual {
+            width: 100%;
+            max-width: 480px;
+            height: 450px;
+            position: relative;
+        }
+
+        .growth-arc {
+            position: absolute;
+            top: 40px;
+            left: 40px;
+            right: 40px;
+            height: 150px;
+        }
+
+        .arc-svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .arc-path {
+            fill: none;
+            stroke: var(--accent-amber);
+            stroke-width: 3;
+            stroke-dasharray: 500;
+            stroke-dashoffset: 500;
+        }
+
+        .quarterly-timeline {
+            position: absolute;
+            bottom: 100px;
+            left: 40px;
+            right: 40px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .quarter-node {
+            text-align: center;
+            opacity: 0;
+        }
+
+        .quarter-label {
+            font-size: 10px;
+            color: var(--text-tertiary);
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .quarter-bar {
+            width: 40px;
+            height: 60px;
+            background: rgba(255,184,0,0.1);
+            border: 1px solid var(--accent-amber);
+            border-radius: 4px;
+            margin: 0 auto;
+        }
+
+        .exec-panel {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 16px 24px;
+            background: rgba(255,184,0,0.1);
+            border: 1px solid var(--accent-amber);
+            border-radius: 10px;
+            text-align: center;
+            opacity: 0;
+        }
+
+        .exec-label {
+            font-size: 10px;
+            color: var(--accent-amber);
+            letter-spacing: 2px;
+        }
+
+        /* Pillar 4: Database & Analytics */
+        .database-visual {
+            width: 100%;
+            max-width: 500px;
+            height: 480px;
+            position: relative;
+        }
+
+        .db-schema {
+            position: absolute;
+            top: 40px;
+            left: 40px;
+            right: 40px;
+            height: 200px;
+        }
+
+        .db-node {
+            position: absolute;
+            padding: 10px 14px;
+            background: var(--glass-bg);
+            border: 1px solid var(--accent-blue);
+            border-radius: 6px;
+            font-size: 9px;
+            color: var(--accent-blue);
+            letter-spacing: 1px;
+            opacity: 0;
+        }
+
+        .db-line {
+            position: absolute;
+            height: 1px;
+            background: linear-gradient(90deg, var(--accent-blue), transparent);
+            transform-origin: left center;
+            opacity: 0;
+        }
+
+        .traffic-chart {
+            position: absolute;
+            bottom: 100px;
+            left: 40px;
+            right: 40px;
+            height: 100px;
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--glass-border);
+            border-radius: 8px;
+            padding: 12px;
+        }
+
+        .traffic-title {
+            font-size: 9px;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .traffic-svg {
+            width: 100%;
+            height: 60px;
+        }
+
+        .traffic-line {
+            fill: none;
+            stroke: var(--accent-blue);
+            stroke-width: 2;
+            stroke-dasharray: 300;
+            stroke-dashoffset: 300;
+        }
+
+        .report-panel {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 20px;
+            background: rgba(59,130,246,0.1);
+            border: 1px solid var(--accent-blue);
+            border-radius: 8px;
+            font-size: 10px;
+            color: var(--accent-blue);
+            letter-spacing: 1px;
+            opacity: 0;
+        }
+
+        /* Footer */
+        .footer {
+            min-height: 50vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 80px 40px;
+            background: radial-gradient(ellipse at center, rgba(0,212,255,0.03) 0%, transparent 70%);
+            text-align: center;
+        }
+
+        .footer-tagline {
+            font-size: clamp(28px, 4vw, 48px);
+            font-weight: 700;
+            margin-bottom: 24px;
+            background: linear-gradient(135deg, #fff 0%, var(--accent-cyan) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .footer-subtitle {
+            font-size: 15px;
+            color: var(--text-secondary);
+            max-width: 550px;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .timeline-container {
+                display: none;
+            }
+
+            .pillar-container {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+
+            .pillar-section {
+                padding: 60px 24px;
+            }
+
+            .visual-container {
+                height: 400px;
+                order: -1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero {
+                padding: 60px 24px;
+            }
+
+            .kpi-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .map-container {
+                transform: translate(-50%, -50%) scale(0.8);
+            }
+        }
+
+        /* Scroll Reveal */
+        .reveal-up { opacity: 0; transform: translateY(30px); }
+        .reveal-left { opacity: 0; transform: translateX(-30px); }
+        .reveal-right { opacity: 0; transform: translateX(30px); }
+        .reveal-scale { opacity: 0; transform: scale(0.9); }
+    </style>
+</head>
+<body>
+    <!-- World Map Background -->
+    <div class="world-map"></div>
+    <div class="grid-overlay"></div>
+
+    <!-- Progress Bar -->
+    <div class="progress-bar" id="progressBar"></div>
+
+    <!-- Floating Timeline -->
+    <div class="timeline-container">
+        <div class="timeline-year" id="year1998">1998</div>
+        <div class="timeline-line">
+            <div class="timeline-marker" id="timelineMarker"></div>
+        </div>
+        <div class="timeline-year active" id="year1999">1999</div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="hero" id="hero">
+        <div class="hero-content">
+            <div class="hero-badge reveal-scale">Global Market Intelligence</div>
+            <h1 class="hero-title reveal-up">Analytics Supervisor</h1>
+            <p class="hero-role reveal-up">SPAR International South Africa — Lusaka, Zambia</p>
+            <p class="hero-meta reveal-up">01/07/1998 – 12/27/1999</p>
+            <p class="hero-description reveal-up">
+                Where analytical leadership began. Managing a team of 5 analysts providing insights across 15 distribution centres. 
+                Building the foundation of global market intelligence and executive decision support.
+            </p>
+        </div>
+    </section>
+
+    <!-- Pillar 1: Distribution Analytics Leadership -->
+    <section class="pillar-section" id="pillar1" style="background: radial-gradient(ellipse at 80% 50%, rgba(0,212,255,0.06) 0%, transparent 50%);">
+        <div class="pillar-container">
+            <div class="pillar-content">
+                <div class="pillar-number reveal-left" style="color: var(--accent-cyan);">PILLAR 01 / DISTRIBUTION LEADERSHIP</div>
+                <h2 class="pillar-title reveal-left" style="color: var(--accent-cyan);">Global Team<br>& Analytics Command</h2>
+                
+                <div class="responsibility-card reveal-up" style="--card-accent: var(--accent-cyan);">
+                    <p class="responsibility-text">Managed, Supervised and led a team of 5 analysts to provide analytical insights to 15 distribution centres.</p>
+                </div>
+            </div>
+            
+            <div class="visual-container">
+                <div class="distribution-map reveal-scale">
+                    <div class="map-container" id="mapContainer">
+                        <!-- Distribution nodes will be added by JS -->
+                    </div>
+                    
+                    <div class="analyst-team" id="analystTeam">
+                        <div class="analyst-node">A1</div>
+                        <div class="analyst-node">A2</div>
+                        <div class="analyst-node">A3</div>
+                        <div class="analyst-node">A4</div>
+                        <div class="analyst-node">A5</div>
+                    </div>
+                    
+                    <div class="command-center reveal-up">
+                        <span class="command-label">COMMAND CENTER</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Transition 1 → 2 -->
+    <section class="transition-panel" id="transition1">
+        <div class="transition-label reveal-up">Team Leadership</div>
+        <div class="transition-arrow reveal-scale">↓</div>
+        <div class="transition-label reveal-up">Performance Visibility</div>
+    </section>
+
+    <!-- Pillar 2: KPI Dashboards & Channel Performance -->
+    <section class="pillar-section" id="pillar2" style="background: radial-gradient(ellipse at 20% 50%, rgba(0,229,160,0.06) 0%, transparent 50%);">
+        <div class="pillar-container">
+            <div class="pillar-content">
+                <div class="pillar-number reveal-left" style="color: var(--accent-emerald);">PILLAR 02 / PERFORMANCE VISIBILITY</div>
+                <h2 class="pillar-title reveal-left" style="color: var(--accent-emerald);">KPI Dashboards<br>& Channel Intelligence</h2>
+                
+                <div class="responsibility-card reveal-up" style="--card-accent: var(--accent-emerald);">
+                    <p class="responsibility-text">Develop dashboards that provide insights and visualization into channel performance relative to KPI's, Projections and historical performances.</p>
+                </div>
+            </div>
+            
+            <div class="visual-container">
+                <div class="glass-panel kpi-dashboard reveal-right">
+                    <div class="dashboard-header">
+                        <span class="dashboard-title">Channel Performance Dashboard</span>
+                    </div>
+                    
+                    <div class="kpi-grid">
+                        <div class="kpi-card" id="kpi1">
+                            <div class="kpi-label">Revenue</div>
+                            <div class="kpi-value" id="kpiValue1">$0M</div>
+                        </div>
+                        <div class="kpi-card" id="kpi2">
+                            <div class="kpi-label">Growth</div>
+                            <div class="kpi-value" id="kpiValue2">0%</div>
+                        </div>
+                        <div class="kpi-card" id="kpi3">
+                            <div class="kpi-label">Efficiency</div>
+                            <div class="kpi-value" id="kpiValue3">0%</div>
+                        </div>
+                    </div>
+                    
+                    <div class="performance-chart">
+                        <div class="chart-title">Performance vs Projection</div>
+                        <svg class="chart-svg" viewBox="0 0 400 100" preserveAspectRatio="none">
+                            <path class="chart-line" d="M 0 80 Q 50 70, 100 60 T 200 45 T 300 35 T 400 25" />
+                            <path class="projection-line" d="M 0 85 Q 50 75, 100 65 T 200 50 T 300 40 T 400 30" />
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Transition 2 → 3 -->
+    <section class="transition-panel" id="transition2">
+        <div class="transition-label reveal-up">Performance Visibility</div>
+        <div class="transition-arrow reveal-scale">↓</div>
+        <div class="transition-label reveal-up">Strategic Forecasting</div>
+    </section>
+
+    <!-- Pillar 3: Executive Strategy & Forecasting -->
+    <section class="pillar-section" id="pillar3" style="background: radial-gradient(ellipse at center, rgba(255,184,0,0.06) 0%, transparent 50%);">
+        <div class="pillar-container">
+            <div class="pillar-content">
+                <div class="pillar-number reveal-left" style="color: var(--accent-amber);">PILLAR 03 / STRATEGIC FORECASTING</div>
+                <h2 class="pillar-title reveal-left" style="color: var(--accent-amber);">Executive Strategy<br>& Business Planning</h2>
+                
+                <div class="responsibility-card reveal-up" style="--card-accent: var(--accent-amber);">
+                    <p class="responsibility-text">Provide key marketing information/research to assist management in developing longer-term business plans.</p>
+                </div>
+                
+                <div class="responsibility-card reveal-up" style="--card-accent: var(--accent-amber);">
+                    <p class="responsibility-text">Assist with monthly/quarterly projections and executive-level marketing performance reporting. Provide deep analysis that support solid decision-making.</p>
+                </div>
+            </div>
+            
+            <div class="visual-container">
+                <div class="strategy-visual reveal-scale">
+                    <div class="growth-arc">
+                        <svg class="arc-svg" viewBox="0 0 400 150">
+                            <path class="arc-path" d="M 20 130 Q 200 20, 380 80" />
+                        </svg>
+                    </div>
+                    
+                    <div class="quarterly-timeline" id="quarterlyTimeline">
+                        <div class="quarter-node">
+                            <div class="quarter-label">Q1</div>
+                            <div class="quarter-bar"></div>
+                        </div>
+                        <div class="quarter-node">
+                            <div class="quarter-label">Q2</div>
+                            <div class="quarter-bar"></div>
+                        </div>
+                        <div class="quarter-node">
+                            <div class="quarter-label">Q3</div>
+                            <div class="quarter-bar"></div>
+                        </div>
+                        <div class="quarter-node">
+                            <div class="quarter-label">Q4</div>
+                            <div class="quarter-bar"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="exec-panel" id="execPanel">
+                        <span class="exec-label">EXECUTIVE BRIEFING</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Transition 3 → 4 -->
+    <section class="transition-panel" id="transition3">
+        <div class="transition-label reveal-up">Strategic Forecasting</div>
+        <div class="transition-arrow reveal-scale">↓</div>
+        <div class="transition-label reveal-up">Database Intelligence</div>
+    </section>
+
+    <!-- Pillar 4: Database Logic & Marketing Analytics -->
+    <section class="pillar-section" id="pillar4" style="background: radial-gradient(ellipse at 70% 50%, rgba(59,130,246,0.08) 0%, transparent 50%);">
+        <div class="pillar-container">
+            <div class="pillar-content">
+                <div class="pillar-number reveal-left" style="color: var(--accent-blue);">PILLAR 04 / DATABASE INTELLIGENCE</div>
+                <h2 class="pillar-title reveal-left" style="color: var(--accent-blue);">Data Architecture<br>& Marketing Analytics</h2>
+                
+                <div class="responsibility-card reveal-up" style="--card-accent: var(--accent-blue);">
+                    <p class="responsibility-text">Work with Data Services and Product management teams to further develop database logic for dashboard presentation.</p>
+                </div>
+                
+                <div class="responsibility-card reveal-up" style="--card-accent: var(--accent-blue);">
+                    <p class="responsibility-text">Analyse newsletter metrics, demographics, and website traffic using Excel, SQL and analytical skills to make content recommendations to editorial staff and provide reports to management.</p>
+                </div>
+            </div>
+            
+            <div class="visual-container">
+                <div class="database-visual reveal-scale">
+                    <div class="db-schema" id="dbSchema">
+                        <!-- Database nodes will be added by JS -->
+                    </div>
+                    
+                    <div class="traffic-chart">
+                        <div class="traffic-title">Website Traffic Analysis</div>
+                        <svg class="traffic-svg" viewBox="0 0 400 60" preserveAspectRatio="none">
+                            <path class="traffic-line" d="M 0 50 Q 50 45, 100 35 T 200 25 T 300 20 T 400 10" />
+                        </svg>
+                    </div>
+                    
+                    <div class="report-panel" id="reportPanel">
+                        REPORT DELIVERED TO MANAGEMENT
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer" id="footer">
+        <h2 class="footer-tagline reveal-up">Before enterprise BI and machine learning,<br>I led market intelligence at scale.</h2>
+        <p class="footer-subtitle reveal-up">SPAR International South Africa — Analytics Supervisor — 1998 - 1999</p>
+    </footer>
+
+    <script>
+        // Register GSAP plugins
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Progress Bar
+        gsap.to('#progressBar', {
+            scaleX: 1,
+            ease: 'none',
+            scrollTrigger: {
+                trigger: 'body',
+                start: 'top top',
+                end: 'bottom bottom',
+                scrub: 0.3
+            }
+        });
+
+        // Timeline Marker Animation
+        gsap.to('#timelineMarker', {
+            top: '100%',
+            ease: 'none',
+            scrollTrigger: {
+                trigger: 'body',
+                start: 'top top',
+                end: 'bottom bottom',
+                scrub: 0.3
+            }
+        });
+
+        // Hero Animations
+        gsap.timeline({ delay: 0.3 })
+            .to('.hero-badge', { opacity: 1, scale: 1, duration: 0.8, ease: 'power3.out' })
+            .to('.hero-title', { opacity: 1, y: 0, duration: 1, ease: 'power3.out' }, '-=0.4')
+            .to('.hero-role', { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' }, '-=0.6')
+            .to('.hero-meta', { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' }, '-=0.5')
+            .to('.hero-description', { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' }, '-=0.4');
+
+        // Pillar 1: Distribution Map Animation
+        ScrollTrigger.create({
+            trigger: '#pillar1',
+            start: 'top 60%',
+            onEnter: () => {
+                const mapContainer = document.getElementById('mapContainer');
+                
+                // Create 15 distribution nodes
+                const nodePositions = [
+                    { x: 50, y: 80 }, { x: 100, y: 60 }, { x: 150, y: 90 },
+                    { x: 200, y: 50 }, { x: 250, y: 70 }, { x: 300, y: 85 },
+                    { x: 350, y: 55 }, { x: 80, y: 140 }, { x: 130, y: 160 },
+                    { x: 180, y: 130 }, { x: 230, y: 150 }, { x: 280, y: 120 },
+                    { x: 330, y: 145 }, { x: 100, y: 200 }, { x: 250, y: 190 }
+                ];
+
+                nodePositions.forEach((pos, i) => {
+                    const node = document.createElement('div');
+                    node.className = 'map-node';
+                    if (i < 5) node.classList.add('pulse');
+                    node.style.left = pos.x + 'px';
+                    node.style.top = pos.y + 'px';
+                    mapContainer.appendChild(node);
+
+                    gsap.to(node, {
+                        opacity: 1,
+                        duration: 0.3,
+                        delay: i * 0.08,
+                        ease: 'power2.out'
+                    });
+                });
+
+                // Animate analyst team
+                document.querySelectorAll('.analyst-node').forEach((node, i) => {
+                    gsap.to(node, {
+                        opacity: 1,
+                        x: 0,
+                        duration: 0.4,
+                        delay: 1.5 + i * 0.1,
+                        ease: 'power2.out'
+                    });
+                });
+            },
+            once: true
+        });
+
+        // Pillar 2: KPI Dashboard Animation
+        ScrollTrigger.create({
+            trigger: '#pillar2',
+            start: 'top 60%',
+            onEnter: () => {
+                // Animate KPI values
+                gsap.to('#kpiValue1', { 
+                    innerHTML: '$47M', 
+                    duration: 2, 
+                    snap: { innerHTML: 1 },
+                    ease: 'power2.out'
+                });
+                gsap.to('#kpiValue2', { 
+                    innerHTML: '23%', 
+                    duration: 1.8, 
+                    delay: 0.2,
+                    snap: { innerHTML: 1 },
+                    ease: 'power2.out'
+                });
+                gsap.to('#kpiValue3', { 
+                    innerHTML: '91%', 
+                    duration: 2, 
+                    delay: 0.4,
+                    snap: { innerHTML: 1 },
+                    ease: 'power2.out'
+                });
+
+                // Animate chart lines
+                gsap.to('.chart-line', {
+                    strokeDashoffset: 0,
+                    duration: 2.5,
+                    delay: 0.5,
+                    ease: 'power2.out'
+                });
+                gsap.to('.projection-line', {
+                    strokeDashoffset: 0,
+                    duration: 2.5,
+                    delay: 1,
+                    ease: 'power2.out'
+                });
+            },
+            once: true
+        });
+
+        // Pillar 3: Strategy Animation
+        ScrollTrigger.create({
+            trigger: '#pillar3',
+            start: 'top 60%',
+            onEnter: () => {
+                // Animate growth arc
+                gsap.to('.arc-path', {
+                    strokeDashoffset: 0,
+                    duration: 2.5,
+                    ease: 'power2.out'
+                });
+
+                // Animate quarterly nodes
+                document.querySelectorAll('.quarter-node').forEach((node, i) => {
+                    gsap.to(node, {
+                        opacity: 1,
+                        y: 0,
+                        duration: 0.5,
+                        delay: 1 + i * 0.15,
+                        ease: 'power2.out'
+                    });
+                });
+
+                // Show executive panel
+                gsap.to('#execPanel', {
+                    opacity: 1,
+                    scale: 1,
+                    duration: 0.6,
+                    delay: 1.8,
+                    ease: 'back.out(1.7)'
+                });
+            },
+            once: true
+        });
+
+        // Pillar 4: Database Animation
+        ScrollTrigger.create({
+            trigger: '#pillar4',
+            start: 'top 60%',
+            onEnter: () => {
+                const dbSchema = document.getElementById('dbSchema');
+                
+                // Create database nodes
+                const nodes = [
+                    { label: 'DATA', x: 180, y: 20 },
+                    { label: 'SQL', x: 80, y: 80 },
+                    { label: 'EXCEL', x: 180, y: 80 },
+                    { label: 'DASHBOARD', x: 280, y: 80 },
+                    { label: 'METRICS', x: 80, y: 140 },
+                    { label: 'DEMOGRAPHICS', x: 180, y: 140 },
+                    { label: 'TRAFFIC', x: 280, y: 140 }
+                ];
+
+                nodes.forEach((node, i) => {
+                    const nodeEl = document.createElement('div');
+                    nodeEl.className = 'db-node';
+                    nodeEl.textContent = node.label;
+                    nodeEl.style.left = node.x + 'px';
+                    nodeEl.style.top = node.y + 'px';
+                    dbSchema.appendChild(nodeEl);
+
+                    gsap.to(nodeEl, {
+                        opacity: 1,
+                        duration: 0.4,
+                        delay: i * 0.1,
+                        ease: 'power2.out'
+                    });
+                });
+
+                // Create connection lines
+                const connections = [
+                    { from: 0, to: 1 }, { from: 0, to: 2 }, { from: 0, to: 3 },
+                    { from: 1, to: 4 }, { from: 2, to: 5 }, { from: 3, to: 6 }
+                ];
+
+                connections.forEach((conn, i) => {
+                    const from = nodes[conn.from];
+                    const to = nodes[conn.to];
+                    const line = document.createElement('div');
+                    line.className = 'db-line';
+                    const length = Math.sqrt(Math.pow(to.x - from.x, 2) + Math.pow(to.y - from.y, 2));
+                    const angle = Math.atan2(to.y - from.y, to.x - from.x) * 180 / Math.PI;
+                    
+                    line.style.width = length + 'px';
+                    line.style.left = (from.x + 30) + 'px';
+                    line.style.top = (from.y + 15) + 'px';
+                    line.style.transform = `rotate(${angle}deg)`;
+                    dbSchema.appendChild(line);
+
+                    gsap.to(line, {
+                        opacity: 1,
+                        duration: 0.3,
+                        delay: 0.8 + i * 0.1
+                    });
+                });
+
+                // Animate traffic line
+                gsap.to('.traffic-line', {
+                    strokeDashoffset: 0,
+                    duration: 2.5,
+                    delay: 1.5,
+                    ease: 'power2.out'
+                });
+
+                // Show report panel
+                gsap.to('#reportPanel', {
+                    opacity: 1,
+                    y: 0,
+                    duration: 0.6,
+                    delay: 2,
+                    ease: 'power2.out'
+                });
+            },
+            once: true
+        });
+
+        // Reveal animations for all sections
+        const revealElements = document.querySelectorAll('.reveal-up, .reveal-left, .reveal-right, .reveal-scale');
+        
+        revealElements.forEach(el => {
+            gsap.set(el, { opacity: 0 });
+            
+            let fromVars = { opacity: 0 };
+            if (el.classList.contains('reveal-up')) fromVars.y = 30;
+            if (el.classList.contains('reveal-left')) fromVars.x = -30;
+            if (el.classList.contains('reveal-right')) fromVars.x = 30;
+            if (el.classList.contains('reveal-scale')) fromVars.scale = 0.9;
+
+            gsap.to(el, {
+                ...fromVars,
+                opacity: 1,
+                duration: 0.8,
+                ease: 'power3.out',
+                scrollTrigger: {
+                    trigger: el,
+                    start: 'top 85%',
+                    toggleActions: 'play none none none'
+                }
+            });
+        });
+
+        // Transition panel animations
+        document.querySelectorAll('.transition-panel').forEach(panel => {
+            gsap.from(panel.querySelectorAll('.reveal-up, .reveal-scale'), {
+                y: 20,
+                opacity: 0,
+                duration: 0.6,
+                stagger: 0.1,
+                scrollTrigger: {
+                    trigger: panel,
+                    start: 'top 80%',
+                    toggleActions: 'play none none none'
+                }
+            });
+        });
+
+        // Footer animation
+        gsap.from('.footer-tagline, .footer-subtitle', {
+            y: 30,
+            opacity: 0,
+            duration: 0.8,
+            stagger: 0.2,
+            scrollTrigger: {
+                trigger: '#footer',
+                start: 'top 80%',
+                toggleActions: 'play none none none'
+            }
+        });
+    </script>
+</body>
+</html>
